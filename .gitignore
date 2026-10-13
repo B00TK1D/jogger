@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.cache/
+tmux-jogger-popup-pid
+tests/__pycache__/
+*.egg-info/
