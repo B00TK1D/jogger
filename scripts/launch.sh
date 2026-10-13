@@ -31,8 +31,7 @@ state_file="${TMPDIR:-/tmp}/tmux-jogger-popup-${UID:-$(id -u)}.pid"
 if [ -f "$state_file" ]; then
     old_pid="$(cat "$state_file" 2>/dev/null || true)"
     if [ -n "$old_pid" ] && kill -0 "$old_pid" 2>/dev/null; then
-        kill "$old_pid" 2>/dev/null || true
-        rm -f "$state_file"
+        # Popup already open; do nothing. Close with Ctrl-C inside the popup.
         exit 0
     fi
     rm -f "$state_file"
