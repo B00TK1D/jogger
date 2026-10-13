@@ -26,7 +26,7 @@ insert it (never executed).
    # then press prefix + I
    ```
 
-4. Press `prefix + u`, type a request, press Enter to insert the command.
+4. Press `prefix + Ctrl-u`, type a request, press Enter to insert the command.
 
 ## Manual install
 
@@ -58,7 +58,7 @@ tmux source-file ~/.tmux.conf
 
 - `Enter`: insert current suggestion
 - `Ctrl-C`: close without inserting
-- `prefix + u`: close (or open)
+- `prefix + Ctrl-u`: close (or open)
 
 ## Cache
 

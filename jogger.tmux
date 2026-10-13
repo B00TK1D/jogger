@@ -28,7 +28,7 @@ if [ -z "$tmux_version" ] || [ "${major:-0}" -lt 3 ] 2>/dev/null || { [ "${major
     exit 0
 fi
 
-KEY="$(get_tmux_option @jogger_key u)"
+KEY="$(get_tmux_option @jogger_key C-u)"
 
 # Register binding. The launcher captures the pane id at invocation.
 tmux bind-key "$KEY" run-shell -b "\"$LAUNCHER\" '#{pane_id}'"
