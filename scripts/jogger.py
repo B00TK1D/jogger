@@ -8,6 +8,7 @@ import fcntl
 import hashlib
 import json
 import os
+import platform
 import re
 import signal
 import subprocess
@@ -561,6 +562,17 @@ class AppState:
 
     def effective_system_prompt(self):
         prompt = self.config.effective_system_prompt
+        try:
+            r = subprocess.run(
+                ["tmux", "display-message", "-p", "-t", self.pane_id, "#{pane_current_command}"],
+                capture_output=True, text=True, timeout=5,
+            )
+            cmd = r.stdout.strip() if r.returncode == 0 else ""
+        except Exception:
+            cmd = ""
+        # Add OS/arch only when not remotely connected via ssh.
+        if "ssh" not in cmd.lower():
+            prompt += "\nOS/arch: " + platform.system() + " " + platform.machine()
         if self.context_text:
             prompt = prompt + (
                 "\n\nContext from the currently displayed text in the target pane "
