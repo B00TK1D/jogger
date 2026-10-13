@@ -714,7 +714,10 @@ def _draw(stdscr, state):
     else:
         put(r, 0, "...")
     # hints
-    hint = "Enter: insert  Ctrl-C: close  prefix+u: close"
+    with state.lock:
+        has_context = bool(state.context_text)
+    context_hint = "Ctrl-I: remove context" if has_context else "Ctrl-I: add context"
+    hint = f"Enter: insert  {context_hint}  Ctrl-C: close"
     put(h - 1, 0, hint[: w - 1])
     # status markers
     if loading and cmd:
@@ -782,7 +785,15 @@ def run_ui(pane_id, state_file=None):
                     cur = state.input
                 state.on_input_change(cur[:-1])
                 continue
-            if key == 9:  # Ctrl-I (Tab): context
+            if key == 9:  # Ctrl-I (Tab): context toggle
+                with state.lock:
+                    has_context = bool(state.context_text)
+                if has_context:
+                    state.context_text = None
+                    with state.lock:
+                        cur = state.input
+                    state.on_input_change(cur)
+                    continue
                 try:
                     ok = state.load_pane_context()
                 except Exception as exc:
@@ -964,7 +975,15 @@ def run_ui(pane_id, state_file=None, config_override=None):
                     cur = state.input
                 state.on_input_change(cur[:-1])
                 continue
-            if key == 9:  # Ctrl-I (Tab): capture current pane text as context
+            if key == 9:  # Ctrl-I (Tab): toggle pane context
+                with state.lock:
+                    has_context = bool(state.context_text)
+                if has_context:
+                    state.context_text = None
+                    with state.lock:
+                        cur = state.input
+                    state.on_input_change(cur)
+                    continue
                 try:
                     ok = state.load_pane_context()
                 except Exception as exc:
