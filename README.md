@@ -58,6 +58,7 @@ tmux source-file ~/.tmux.conf
 
 - `Enter`: insert current suggestion
 - `Ctrl-C`: close without inserting
+- `Ctrl-I`: capture currently displayed target-pane text as context
 - `prefix + Ctrl-u`: close (or open)
 
 ## Cache
