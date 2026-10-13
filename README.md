@@ -1,99 +1,78 @@
-# tmux-jogger
+# jogger
 
-Jog your memory: turn a short natural-language description into a shell command
-inside tmux. Press a key, type a request, get a debounced command suggestion,
-press Enter to insert it (never executed).
+A tmux plugin that turns a short natural-language description into a shell
+command. Press the key, type your request, get a suggestion, press Enter to
+insert it (never executed).
 
-## Requirements
+## Quickstart
 
-- tmux 3.2+ (uses `display-popup`)
-- Python 3 (standard library only)
-- An OpenAI-compatible Chat Completions endpoint and API key
+1. Install with TPM by adding to `~/.tmux.conf`:
 
-## Install (TPM)
+   ```tmux
+   set -g @plugin 'B00TK1D/jogger'
+   set -g @jogger_model 'gpt-4o-mini'   # required
+   ```
 
-Add to `~/.tmux.conf`:
+2. Set your API key in the environment that starts tmux:
 
-```tmux
-set -g @plugin 'OWNER/tmux-jogger'
-set -g @jogger_model 'gpt-4o-mini'
-# optional:
-# set -g @jogger_api_base 'https://api.openai.com/v1'
-# set -g @jogger_key 'u'
-```
+   ```sh
+   export OPENAI_API_KEY=sk-...
+   ```
 
-Ensure `run '~/.tmux/plugins/tpm/tpm'` remains at the end of `~/.tmux.conf`.
-Reload: `tmux source-file ~/.tmux.conf`, then press `prefix + I` to install.
-Set the API key in the environment that starts tmux:
+3. Reload and install:
 
-```sh
-export OPENAI_API_KEY=sk-...
-# or, for a running server:
-tmux set-environment -g OPENAI_API_KEY sk-...
-```
+   ```sh
+   tmux source-file ~/.tmux.conf
+   # then press prefix + I
+   ```
+
+4. Press `prefix + u`, type a request, press Enter to insert the command.
 
 ## Manual install
 
 ```sh
-git clone https://github.com/OWNER/tmux-jogger ~/.tmux/plugins/tmux-jogger
+git clone https://github.com/B00TK1D/jogger ~/.tmux/plugins/jogger
 # add to ~/.tmux.conf:
-run-shell ~/.tmux/plugins/tmux-jogger/jogger.tmux
+run-shell ~/.tmux/plugins/jogger/jogger.tmux
 tmux source-file ~/.tmux.conf
 ```
 
 ## Configuration
 
-| Option | Default | Description |
-|---|---|---|
-| `@jogger_key` | `u` | Key under the tmux prefix |
-| `@jogger_api_base` | `https://api.openai.com/v1` | OpenAI-compatible base URL |
-| `@jogger_api_key` | (env) | API key (prefer `OPENAI_API_KEY`) |
-| `@jogger_model` | (required) | Model name |
-| `@jogger_debounce_ms` | `400` | Typing debounce |
-| `@jogger_timeout_seconds` | `20` | Request timeout |
-| `@jogger_system_prompt` | (built-in) | System-prompt override |
-| `@jogger_max_tokens` | (unset) | Output limit |
-| `@jogger_cache_max_entries` | `1000` | Max cached entries |
-| `@jogger_cache_dir` | (XDG) | Cache directory override |
-| `@jogger_popup_width` | `60` | Popup width (min 40) |
-| `@jogger_popup_height` | `10` | Popup height (min 8) |
+| Option | Default |
+|---|---|
+| `@jogger_key` | `u` |
+| `@jogger_api_base` | `https://api.openai.com/v1` |
+| `@jogger_api_key` | (env `OPENAI_API_KEY`) |
+| `@jogger_model` | required |
+| `@jogger_debounce_ms` | `400` |
+| `@jogger_timeout_seconds` | `20` |
+| `@jogger_system_prompt` | built-in |
+| `@jogger_max_tokens` | unset |
+| `@jogger_cache_max_entries` | `1000` |
+| `@jogger_cache_dir` | XDG cache |
+| `@jogger_popup_width` | `60` |
+| `@jogger_popup_height` | `10` |
 
-## First use
+## Keys
 
-1. Press `prefix + u` (or configured key).
-2. Type a request. A command suggestion appears after a short debounce;
-   cached results appear instantly.
-3. Press `Enter` to insert the current suggestion into the pane that was
-   focused when the plugin opened. The command is inserted, not executed.
-4. Press `Ctrl-C` or `prefix + u` again to close without inserting.
-5. Empty input never generates or inserts a command.
+- `Enter`: insert current suggestion
+- `Ctrl-C`: close without inserting
+- `prefix + u`: close (or open)
 
 ## Cache
 
-Stored in `${XDG_CACHE_HOME:-$HOME/.cache}/tmux-jogger/cache.json`
-(directory `0700`, file `0600`). SHA-256 keyed on the trimmed description plus
-model, API base, and a hash of the effective system prompt. Local only;
-clear it manually:
+Stored in `${XDG_CACHE_HOME:-$HOME/.cache}/tmux-jogger/cache.json`.
+Clear with `rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}/tmux-jogger"`.
 
-```sh
-rm -rf "${XDG_CACHE_HOME:-$HOME/.cache}/tmux-jogger"
-```
+## Requirements
 
-Descriptions and uncached commands are sent to the configured API provider.
+tmux 3.2+, Python 3 (standard library only).
 
 ## Tests
 
 ```sh
 python3 -m unittest discover -s tests
 ```
-
-## Uninstall
-
-Remove the plugin line from `~/.tmux.conf`, run `prefix + alt + u` (TPM uninstall)
-or delete `~/.tmux/plugins/tmux-jogger`, reload tmux, and remove the cache dir.
-
-## Privacy / security
-
-- Commands are never executed automatically; they are inserted as literal text.
-- API keys are never logged or shown.
-- No pane history or environment data is sent unless explicitly configured.
+EOF
+cd /root/jogger && python3 -m unittest discover -s tests >/dev/null 2>&1 && echo ok
