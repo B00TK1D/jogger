@@ -684,14 +684,6 @@ def _draw(stdscr, state):
 
 
 def run_ui(pane_id, state_file=None):
-    if state_file:
-        try:
-            with open(state_file, "w") as f:
-                f.write(str(os.getpid()))
-        except OSError:
-            pass
-    atexit.register(lambda: _cleanup_state_file(state_file))
-
     config = Config()
     config.resolve()
     try:
@@ -702,6 +694,14 @@ def run_ui(pane_id, state_file=None):
         # print error and exit non-zero so popup shows message
         raise
     state = AppState(config, pane_id)
+
+    if state_file:
+        try:
+            with open(state_file, "w") as f:
+                f.write(str(os.getpid()))
+        except OSError:
+            pass
+    atexit.register(lambda: _cleanup_state_file(state_file))
 
     def main(stdscr):
         curses.curs_set(1)
@@ -836,19 +836,13 @@ _original_run_ui = run_ui
 
 
 def run_ui(pane_id, state_file=None, config_override=None):
-    if state_file:
-        try:
-            with open(state_file, "w") as f:
-                f.write(str(os.getpid()))
-        except OSError:
-            pass
-    atexit.register(lambda: _cleanup_state_file(state_file))
-
     config = config_override if config_override is not None else None
     if config is None:
         config = Config()
         config.resolve()
     else:
+        # ensure resolved/validate
+        # if base options not set, resolve missing
         if config.api_base is None:
             config.api_base = tmux_option("@jogger_api_base", "http://127.0.0.1:1234")
         if config.model is None:
@@ -869,6 +863,14 @@ def run_ui(pane_id, state_file=None, config_override=None):
     except ConfigError:
         raise
     state = AppState(config, pane_id)
+
+    if state_file:
+        try:
+            with open(state_file, "w") as f:
+                f.write(str(os.getpid()))
+        except OSError:
+            pass
+    atexit.register(lambda: _cleanup_state_file(state_file))
 
     def main(stdscr):
         curses.curs_set(1)
