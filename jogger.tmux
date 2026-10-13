@@ -31,4 +31,4 @@ fi
 KEY="$(get_tmux_option @jogger_key C-u)"
 
 # Register binding. The launcher captures the pane id at invocation.
-tmux bind-key "$KEY" run-shell -b "\"$LAUNCHER\" '#{pane_id}'"
+tmux bind-key "$KEY" run-shell -b "\"$LAUNCHER\" '#{pane_id}' || :"

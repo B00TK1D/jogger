@@ -50,4 +50,5 @@ height="$(get_opt @jogger_popup_height 10)"
 [ "$width" -lt 40 ] 2>/dev/null && width=40
 [ "$height" -lt 8 ] 2>/dev/null && height=8
 
-tmux display-popup -E -T 'jogger' -w "$width" -h "$height" "PYTHONPATH='$PLUGIN_DIR' python3 '$PY_SCRIPT' --pane '$pane_id' --state-file '$state_file'"
+tmux display-popup -E -T 'jogger' -w "$width" -h "$height" "PYTHONPATH='$PLUGIN_DIR' python3 '$PY_SCRIPT' --pane '$pane_id' --state-file '$state_file'" || true
+exit 0

@@ -773,6 +773,10 @@ def run_ui(pane_id, state_file=None):
 
     def main(stdscr):
         curses.curs_set(1)
+        try:
+            curses.set_escdelay(25)
+        except Exception:
+            pass
         stdscr.timeout(100)
         # initial empty
         while True:
@@ -887,6 +891,7 @@ def run_ui(pane_id, state_file=None):
                     if ch.isprintable():
                         with state.lock:
                             cur = state.input
+                        state.history_pos = None
                         state.on_input_change(cur + ch)
                 except (ValueError, OverflowError):
                     pass
@@ -1005,6 +1010,10 @@ def run_ui(pane_id, state_file=None, config_override=None):
 
     def main(stdscr):
         curses.curs_set(1)
+        try:
+            curses.set_escdelay(25)
+        except Exception:
+            pass
         stdscr.timeout(100)
         while True:
             _draw(stdscr, state)
@@ -1071,13 +1080,12 @@ def run_ui(pane_id, state_file=None, config_override=None):
             if key == 9:  # Ctrl-I (Tab): toggle pane context
                 with state.lock:
                     has_context = bool(state.context_text)
+                    cur = state.input
                 if has_context:
                     state.context_text = None
-                    with state.lock:
-                        cur = state.input
                     state.history_pos = None
-                state.on_input_change(cur)
-                continue
+                    state.on_input_change(cur)
+                    continue
                 try:
                     ok = state.load_pane_context()
                 except Exception as exc:
@@ -1090,9 +1098,6 @@ def run_ui(pane_id, state_file=None, config_override=None):
                         state.status = "error"
                         state.error = "No visible pane text to capture"
                     continue
-                # regenerate current suggestion with new context
-                with state.lock:
-                    cur = state.input
                 state.history_pos = None
                 state.on_input_change(cur)
                 continue
@@ -1118,6 +1123,7 @@ def run_ui(pane_id, state_file=None, config_override=None):
                     if ch.isprintable():
                         with state.lock:
                             cur = state.input
+                        state.history_pos = None
                         state.on_input_change(cur + ch)
                 except (ValueError, OverflowError):
                     pass
