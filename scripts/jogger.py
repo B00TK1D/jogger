@@ -491,9 +491,7 @@ def generate_command(config, description, system_prompt=None, rejected=None):
     if rejected is None:
         rejected = []
     messages = [{"role": "system", "content": system_prompt}]
-    for cmd in rejected:
-        messages.append({"role": "assistant", "content": cmd})
-        messages.append({"role": "user", "content": "That command was wrong, try a different one."})
+    # The original request is always sent once at the start of the conversation.
     messages.append({
         "role": "user",
         "content": (
@@ -502,6 +500,16 @@ def generate_command(config, description, system_prompt=None, rejected=None):
             "<request>\n" + description + "\n</request>"
         ),
     })
+    # Retries: append the previous wrong command(s) and the "wrong" notice;
+    # do NOT repeat the original request/system prompt again as a new message.
+    for cmd in rejected:
+        messages.append({"role": "assistant", "content": cmd})
+        messages.append({"role": "user", "content": "That command was wrong, try a different one."})
+    if rejected:
+        messages.append({
+            "role": "user",
+            "content": "Try again and provide a different, better command for the original request above.",
+        })
     payload = {
         "model": config.model,
         "messages": messages,
@@ -537,6 +545,59 @@ def generate_command(config, description, system_prompt=None, rejected=None):
 
 
 # ---------------------------------------------------------------------------
+# Persistent input history
+# ---------------------------------------------------------------------------
+
+HISTORY_MAX_ENTRIES = 200
+
+
+def _history_path(config=None):
+    return os.path.join(_cache_dir(config), "history.json")
+
+
+def load_history(config=None):
+    path = _history_path(config)
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (FileNotFoundError, OSError, ValueError):
+        return []
+    if not isinstance(data, list):
+        return []
+    return [x for x in data if isinstance(x, str) and x.strip()]
+
+
+def save_history(entries, config=None):
+    path = _history_path(config)
+    directory = os.path.dirname(path)
+    os.makedirs(directory, exist_ok=True)
+    try:
+        os.chmod(directory, 0o700)
+    except OSError:
+        pass
+    fd, tmp = tempfile.mkstemp(prefix=".history.", dir=directory)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(entries, f, ensure_ascii=False)
+            f.flush()
+            try:
+                os.fsync(f.fileno())
+            except OSError:
+                pass
+        try:
+            os.chmod(tmp, 0o600)
+        except OSError:
+            pass
+        os.replace(tmp, path)
+    finally:
+        try:
+            if os.path.exists(tmp):
+                os.unlink(tmp)
+        except OSError:
+            pass
+
+
+# ---------------------------------------------------------------------------
 # State / UI
 # ---------------------------------------------------------------------------
 
@@ -550,7 +611,7 @@ class AppState:
         self.context_text = None
         self.rejected_commands = []
         self.regenerate_count = 0
-        self.history = []
+        self.history = load_history(config)
         self.history_pos = None
         self.saved_input = ""
         self.rev = 0
@@ -624,6 +685,9 @@ class AppState:
             with self.lock:
                 if not self.history or self.history[-1] != stripped:
                     self.history.append(stripped)
+                    if len(self.history) > HISTORY_MAX_ENTRIES:
+                        self.history = self.history[-HISTORY_MAX_ENTRIES:]
+                    save_history(self.history, self.config)
         if not stripped:
             self.cancel_timer()
             with self.lock:

@@ -60,7 +60,7 @@ tmux source-file ~/.tmux.conf
 - `Ctrl-C`: close without inserting
 - `Ctrl-I`: capture currently displayed target-pane text as context
 - `Ctrl-N`: regenerate (marks last command wrong; keeps appending history)
-- `Up` / `Down`: cycle through previously entered requests
+- `Up` / `Down`: cycle through previously entered requests (persisted across runs in `${XDG_CACHE_HOME:-$HOME/.cache}/tmux-jogger/history.json`)
 
 ## Cache
 
