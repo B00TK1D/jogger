@@ -42,7 +42,7 @@ tmux source-file ~/.tmux.conf
 | Option | Default |
 |---|---|
 | `@jogger_key` | `u` |
-| `@jogger_api_base` | `https://api.openai.com/v1` |
+| `@jogger_api_base` | `http://127.0.0.1:1234` |
 | `@jogger_api_key` | (env `OPENAI_API_KEY`) |
 | `@jogger_model` | required |
 | `@jogger_debounce_ms` | `400` |

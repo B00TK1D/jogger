@@ -132,7 +132,7 @@ class Config:
 
     def resolve(self):
         if self.api_base is None:
-            self.api_base = tmux_option("@jogger_api_base", "https://api.openai.com/v1")
+            self.api_base = tmux_option("@jogger_api_base", "http://127.0.0.1:1234")
         if self.model is None:
             self.model = tmux_option("@jogger_model", None)
         if self.system_prompt is None:
@@ -176,8 +176,6 @@ class Config:
     def validate(self):
         if not self.model:
             raise ConfigError("missing model: set @jogger_model (or --model)")
-        if not self.api_key:
-            raise ConfigError("missing API key: set OPENAI_API_KEY or @jogger_api_key")
         return True
 
     @property
@@ -186,10 +184,10 @@ class Config:
 
 
 DEFAULT_SYSTEM_PROMPT = (
-    "You are a shell command generator. Reply with exactly one best-effort shell command. "
-    "No Markdown fences, no prose, no surrounding quotes. Prefer commands appropriate to "
-    "the current shell and OS. Avoid destructive actions unless explicitly requested. "
-    "Ask for clarification only when a safe useful command cannot be inferred."
+    "You are a unix shell command generator."
+    "Reply with exactly one best-effort shell command."
+    "No Markdown fences, no prose, no surrounding quotes."
+    "Keep commands as simple as possible while exactly performing desired action."
 )
 
 
@@ -203,7 +201,7 @@ def normalize_base_url(base):
         base = ""
     base = base.strip()
     if not base:
-        return "https://api.openai.com/v1"
+        return "http://127.0.0.1:1234"
     # parse-ish handling
     # remove trailing slashes
     base = base.rstrip("/")
@@ -846,7 +844,7 @@ def run_ui(pane_id, state_file=None, config_override=None):
         # ensure resolved/validate
         # if base options not set, resolve missing
         if config.api_base is None:
-            config.api_base = tmux_option("@jogger_api_base", "https://api.openai.com/v1")
+            config.api_base = tmux_option("@jogger_api_base", "http://127.0.0.1:1234")
         if config.model is None:
             config.model = tmux_option("@jogger_model", None)
         if config.system_prompt is None:
