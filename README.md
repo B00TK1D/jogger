@@ -59,6 +59,8 @@ tmux source-file ~/.tmux.conf
 - `Enter`: insert current suggestion
 - `Ctrl-C`: close without inserting
 - `Ctrl-I`: capture currently displayed target-pane text as context
+- `Ctrl-N`: regenerate (marks last command wrong; keeps appending history)
+- `Up` / `Down`: cycle through previously entered requests
 
 ## Cache
 
