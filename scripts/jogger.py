@@ -508,6 +508,7 @@ def generate_command(config, description, system_prompt=None, rejected=None):
         "model": config.model,
         "messages": messages,
         "temperature": 0.5,
+        "thinking": False,
     }
     if config.max_tokens is not None:
         payload["max_tokens"] = config.max_tokens
